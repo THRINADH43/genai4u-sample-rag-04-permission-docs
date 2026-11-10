@@ -1,0 +1,6 @@
+{
+  "asha":  {"groups": ["all", "hr"], "editor": true},
+  "ravi":  {"groups": ["all", "engineering"]},
+  "meena": {"groups": ["all", "finance"]},
+  "guest": {"groups": ["all"]}
+}

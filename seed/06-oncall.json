@@ -1,0 +1,7 @@
+{
+ "id": "oncall",
+ "text": "Each engineer is on call for one week every two months. The on-call engineer must answer alerts within 15 minutes.",
+ "groups": [
+  "engineering"
+ ]
+}

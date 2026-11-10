@@ -1,0 +1,82 @@
+[
+ {
+  "user": "guest",
+  "question": "How many public holidays does the office have?",
+  "expected_doc": "holidays"
+ },
+ {
+  "user": "guest",
+  "question": "What is the staff Wi-Fi network called?",
+  "expected_doc": "wifi"
+ },
+ {
+  "user": "guest",
+  "question": "When is lunch served in the canteen?",
+  "expected_doc": "canteen"
+ },
+ {
+  "user": "guest",
+  "question": "How much does lunch cost?",
+  "expected_doc": "canteen"
+ },
+ {
+  "user": "asha",
+  "question": "What do senior engineers earn?",
+  "expected_doc": "salaries"
+ },
+ {
+  "user": "asha",
+  "question": "When do appraisals happen?",
+  "expected_doc": "appraisal"
+ },
+ {
+  "user": "asha",
+  "question": "What raise does a rating of 4 give?",
+  "expected_doc": "appraisal"
+ },
+ {
+  "user": "meena",
+  "question": "When are salaries paid?",
+  "expected_doc": "salaries"
+ },
+ {
+  "user": "meena",
+  "question": "What is the marketing budget for 2026?",
+  "expected_doc": "budget"
+ },
+ {
+  "user": "ravi",
+  "question": "On which days are production deploys done?",
+  "expected_doc": "deploy"
+ },
+ {
+  "user": "ravi",
+  "question": "How fast must the on-call engineer answer alerts?",
+  "expected_doc": "oncall"
+ },
+ {
+  "user": "guest",
+  "question": "What are the vendor payment terms?",
+  "expected_doc": "vendor-note"
+ },
+ {
+  "user": "ravi",
+  "question": "What do senior engineers earn?",
+  "expected_doc": null
+ },
+ {
+  "user": "guest",
+  "question": "What is the marketing budget?",
+  "expected_doc": null
+ },
+ {
+  "user": "meena",
+  "question": "Who won the cricket world cup?",
+  "expected_doc": null
+ },
+ {
+  "user": "guest",
+  "question": "When do appraisals happen?",
+  "expected_doc": null
+ }
+]

@@ -1,0 +1,7 @@
+{
+ "id": "deploy",
+ "text": "Production deploys happen on Tuesdays and Thursdays after 6 pm. Every deploy needs one approving code review and green tests.",
+ "groups": [
+  "engineering"
+ ]
+}
