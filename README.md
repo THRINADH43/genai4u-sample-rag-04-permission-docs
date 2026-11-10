@@ -2,7 +2,8 @@
 
 An HTTP service where different users ask questions over a shared set of documents and only
 ever see what they are allowed to. Standard library only; uses Groq if `GROQ_API_KEY` is
-set, otherwise a fake model.
+set, otherwise a fake model. Settings are in `.env.example`; `requirements.txt` is empty
+because nothing needs installing.
 
 ## Run
 
@@ -41,9 +42,11 @@ chunks in one locked step, so search never mixes old and new versions. `GET /job
 
 ## Search
 
-Hybrid: BM25 keywords plus TF-IDF cosine vectors, combined with reciprocal rank fusion
-(`1 / (60 + rank)`). I used TF-IDF vectors instead of a neural embedding model so the
-service and CI need no downloads; a sentence-embedding model could replace `vector_rank`.
+Hybrid: BM25 keywords plus vectors, combined with reciprocal rank fusion (`1 / (60 + rank)`).
+**The "embedding" is a TF-IDF vector, not a neural embedding model.** I chose this so the
+service and CI need no downloads and no GPU; the cost is that the vector side only matches
+words, not meaning, so it adds less than a real embedding model would. Swapping in
+`sentence-transformers` means replacing `vector_rank` only.
 
 ## Answers
 
@@ -71,13 +74,20 @@ anyway, and shows the citation check still blocks it.
 
 `eval/questions.json` has 16 questions, each with a user: 12 should be answered from a given
 document and 4 should be refused (3 because the user lacks permission, 1 because no document
-covers it). `python evaluate.py --min 0.85` exits 1 below 0.85, and GitHub Actions runs it on
-every push, so a quality drop fails the build.
+covers it). `python evaluate.py` reports:
 
-| model | score |
-|-------|-------|
-| FakeLLM (CI) | 16/16 = 1.000 |
-| Groq `openai/gpt-oss-20b` | 16/16 = 1.000 |
+- **retrieval hit rate:** for the 12 answerable questions, is the expected document in that
+  user's top 3 chunks?
+- **answer score:** does the answer cite the expected document, or refuse when it should?
+
+`python evaluate.py --min 0.9` exits 1 when the retrieval hit rate is below 0.9 (11 of 12
+would still pass, 10 of 12 would fail). GitHub Actions runs it on every push
+(`.github/workflows/tests.yml`), so a retrieval quality drop fails the build.
+
+| model | retrieval hit rate | answer score |
+|-------|--------------------|--------------|
+| FakeLLM (CI) | 12/12 = 1.000 | 16/16 = 1.000 |
+| Groq `openai/gpt-oss-20b` | 12/12 = 1.000 | 16/16 = 1.000 |
 
 ## Tests
 

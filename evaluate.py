@@ -1,7 +1,9 @@
-"""Runs eval/questions.json through search + answer. A question passes when the answer cites
-the expected document, or refuses when expected_doc is null. Exits 1 below --min (CI gate).
+"""Runs eval/questions.json through search and answer, and reports two scores:
 
-python evaluate.py --min 0.85
+- retrieval hit rate: for questions with an expected document, is it in the user's top 3 chunks?
+- answer score: does the answer cite the expected document, or refuse when expected_doc is null?
+
+Exits 1 when the retrieval hit rate is below --min (the CI gate).  python evaluate.py --min 0.9
 """
 
 import argparse
@@ -30,25 +32,30 @@ def evaluate(store, users, questions, llm):
     rows = []
     for q in questions:
         hits = hybrid_search(store, users[q["user"]]["groups"], q["question"])
+        retrieved = {c.doc_id for c, _ in hits}
         reply = "".join(answer_stream(q["question"], hits, llm)).strip()
         if q["expected_doc"] is None:
             ok = reply == REFUSAL
         else:
             ok = f"[{q['expected_doc']}#" in reply
-        rows.append({"user": q["user"], "question": q["question"], "ok": ok, "reply": reply[:160]})
-    return sum(r["ok"] for r in rows) / len(rows), rows
+        hit = None if q["expected_doc"] is None else q["expected_doc"] in retrieved
+        rows.append({"user": q["user"], "question": q["question"], "ok": ok, "hit": hit, "reply": reply[:160]})
+    answerable = [r for r in rows if r["hit"] is not None]
+    hit_rate = sum(r["hit"] for r in answerable) / len(answerable)
+    return hit_rate, sum(r["ok"] for r in rows) / len(rows), rows
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--min", type=float, default=0.85)
+    p.add_argument("--min", type=float, default=0.9, help="minimum retrieval hit rate")
     args = p.parse_args()
     llm = GroqLLM() if os.environ.get("GROQ_API_KEY") else FakeLLM()
-    score, rows = evaluate(build_store(), load_users(), json.load(open("eval/questions.json")), llm)
+    hit_rate, answer_score, rows = evaluate(build_store(), load_users(), json.load(open("eval/questions.json")), llm)
     for r in rows:
         print(("PASS " if r["ok"] else "FAIL ") + f"{r['user']:<6} {r['question']}  ->  {r['reply']}")
-    print(f"\nscore {score:.3f} with {type(llm).__name__} (minimum {args.min})")
-    if score < args.min:
+    print(f"\nretrieval hit rate {hit_rate:.3f} (minimum {args.min}), answer score {answer_score:.3f} "
+          f"with {type(llm).__name__}")
+    if hit_rate < args.min:
         sys.exit(1)
 
 
